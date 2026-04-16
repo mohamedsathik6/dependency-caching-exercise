@@ -18,8 +18,9 @@ jobs:
       - uses: actions/cache@v4
         with:
           path: ~/.npm                              
-          key: ${{ runner.os }}-npm-${{ hashFiles('package-lock.json') }}                  
-          restore-keys: ${{ runner.os }}-npm-
+          key: npm-${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+                npm-${{ runner.os }}-
 
       - run: npm ci
       - run: npm run lint
@@ -36,9 +37,9 @@ jobs:
       - uses: actions/cache@v4
         with:
           path: ~/.npm                              
-          key: ${{ runner.os }}-npm-${{ hashFiles('package-lock.json') }}                  
-          restore-keys: ${{ runner.os }}-npm-
-
+          key: npm-${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+                npm-${{ runner.os }}-
       - run: npm ci
       - run: npm test
 
@@ -52,6 +53,12 @@ jobs:
           node-version: '20'
 
       # TODO: Add the same cache step here
-
+      - uses: actions/cache@v4
+        with:
+          path: ~/.npm                              
+          key: npm-${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+                npm-${{ runner.os }}-
+          
       - run: npm ci
       - run: npm run build
