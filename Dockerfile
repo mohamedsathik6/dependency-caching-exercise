@@ -1,16 +1,17 @@
-# Optimized Dockerfile — dependency layer cached separately from source code
-# Fix: Copy package files first so npm ci only re-runs when dependencies change
-
 FROM node:20-alpine AS builder
 WORKDIR /app
 
-# ✅ Copy only dependency manifests first
-# Docker cache is only invalidated when package.json or package-lock.json changes
+# ✅ Step 1: Copy only dependency manifests first
+# npm ci layer only invalidates when package.json/package-lock.json changes
 COPY package.json package-lock.json ./
-RUN npm ci
 
-# ✅ Copy source code after npm ci
-# Code changes no longer invalidate the npm ci layer
+# ✅ Step 2: Use mount cache for npm — never re-downloads tarballs
+# even across separate Docker builds on the same runner
+RUN --mount=type=cache,target=/root/.npm \
+    npm ci
+
+# ✅ Step 3: Copy source code after dependencies
+# Code changes don't invalidate the npm ci layer
 COPY . .
 RUN npm run build
 
